@@ -2,6 +2,8 @@ DOCKER_ORG := noosphere
 EXAMPLE_NAME := hello-world
 TAG := $(DOCKER_ORG)/example-$(EXAMPLE_NAME)-noosphere:latest
 
+HOST_PORT ?= 8081
+CONTAINER_PORT ?= 8081
 .PHONY: build run build-multiplatform try-request
 
 build:
@@ -10,7 +12,7 @@ build:
 
 run: build
 	@echo "Running Docker container..."
-	@docker run --rm -p 3000:3000 $(TAG)
+	@docker run --rm -p $(HOST_PORT):$(CONTAINER_PORT) -e APP_PORT=$(CONTAINER_PORT) $(TAG)
 
 # You may need to set up a docker builder, to do so run:
 # docker buildx create --name mybuilder --bootstrap --use
@@ -23,4 +25,4 @@ try-request:
 	@echo "Sending a test request to the running container..."
 	@curl -X POST -H "Content-Type: application/json" \
 	-d '{"input": "Gemini"}' \
-	http://localhost:3000/computation
+	http://localhost:$(HOST_PORT)/computation

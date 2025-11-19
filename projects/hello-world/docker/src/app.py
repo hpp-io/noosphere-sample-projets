@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import os
 
 app = Flask(__name__)
 
@@ -16,4 +17,5 @@ def computation():
     return jsonify({"output": f"hello world, your input was: {user_input}"})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=3000)
+    port = int(os.environ.get("APP_PORT", 8081))
+    app.run(host='0.0.0.0', port=port)

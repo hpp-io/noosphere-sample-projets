@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/app.py .
 
 # Make port 3000 available to the world outside this container
-EXPOSE 8081
+EXPOSE 8082
 
 # Run app.py when the container launches
 CMD ["python", "app.py"]
