@@ -1,11 +1,11 @@
 DOCKER_ORG := noosphere
-EXAMPLE_NAME := llm
+EXAMPLE_NAME := open-ai
 TAG := $(DOCKER_ORG)/example-$(EXAMPLE_NAME)-noosphere:latest
 
-HOST_PORT ?= 8082
-CONTAINER_PORT ?= 8082
+HOST_PORT ?= 8083
+CONTAINER_PORT ?= 8083
 CONTAINER_NAME := $(EXAMPLE_NAME)
-.PHONY: build run stop build-multiplatform try-request try-request-openai
+.PHONY: build run stop build-multiplatform try-request
 
 build:
 	@echo "Building Docker image: $(TAG)"
@@ -30,9 +30,4 @@ try-request:
 	@echo "Sending a test request to the running container..."
 	@curl -s -X POST -H "Content-Type: application/json" \
 	-d '{"model": "openai/gpt-4o", "prompt": "What is noosphere?"}' \
-	http://localhost:$(HOST_PORT)/computation
-try-request-gemini:
-	@echo "Sending a test request to the running container..."
-	@curl -s -X POST -H "Content-Type: application/json" \
-	-d '{"model": "gemini/gemini-2.5-pro", "prompt": "What is noosphere?"}' \
 	http://localhost:$(HOST_PORT)/computation
