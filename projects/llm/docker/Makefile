@@ -29,7 +29,7 @@ build-multiplatform:
 try-request:
 	@echo "Sending a test request to the running container..."
 	@curl -s -X POST -H "Content-Type: application/json" \
-	-d '{"model": "openai/gpt-4o", "prompt": "What is noosphere?"}' \
+	-d '{"model": "ollama/gpt-oss:120b", "prompt": "What is noosphere?"}' \
 	http://localhost:$(HOST_PORT)/computation
 try-request-gemini:
 	@echo "Sending a test request to the running container..."
