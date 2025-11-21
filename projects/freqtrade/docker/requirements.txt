@@ -1,7 +1,6 @@
 ast_comments
 autogluon
-cachetools
-ccxt
+cachetools>=5.0.0
 Flask
 fastapi
 freqtrade
@@ -10,7 +9,6 @@ humanize
 jax
 jsonschema
 lightgbm
-numpy<1.24
 optuna
 orjson
 protobuf~=5.29.3
@@ -19,7 +17,6 @@ pyarrow
 pycoingecko
 pydantic
 python-rapidjson
-python-telegram-bot==20.0
 PyWavelets
 questionary
 rich
