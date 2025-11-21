@@ -13,7 +13,7 @@ build:
 
 run: stop build
 	@echo "Running Docker container..."
-	@docker run --rm --name $(CONTAINER_NAME) -p $(HOST_PORT):$(CONTAINER_PORT) -e APP_PORT=$(CONTAINER_PORT) $(TAG)
+	@docker run --rm --name $(CONTAINER_NAME) --env-file .env -p $(HOST_PORT):$(CONTAINER_PORT) -e APP_PORT=$(CONTAINER_PORT) $(TAG)
 
 stop:
 	@echo "Stopping and removing container '$(CONTAINER_NAME)'..."
