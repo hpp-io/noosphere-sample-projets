@@ -1,36 +1,27 @@
-DOCKER_ORG := noosphere
 EXAMPLE_NAME := freqtrade
-TAG := $(DOCKER_ORG)/example-$(EXAMPLE_NAME)-noosphere:latest
-
 HOST_PORT ?= 8084
 CONTAINER_PORT ?= 8084
-CONTAINER_NAME := $(EXAMPLE_NAME)
-.PHONY: build run stop test build-multiplatform try-request
 
-build:
-	@echo "Building Docker image: $(TAG)"
-	@docker build -t $(TAG) --build-arg index_url=$(index_url) -f Dockerfile .
+# Include common makefile logic
+include ../../../common.mk
 
+# Phony targets specific to this project
+.PHONY: run try-request test
+
+# Runs the container in the background (detached mode).
 run: stop build
-	@echo "Running Docker container..."
-	@docker run --rm --name $(CONTAINER_NAME) --env-file .env -p $(HOST_PORT):$(CONTAINER_PORT) -e APP_PORT=$(CONTAINER_PORT) $(TAG)
+	@echo "Running container '$(CONTAINER_NAME)' in the background..."
+	@docker run -d --rm --name $(CONTAINER_NAME) --env-file .env -p $(HOST_PORT):$(CONTAINER_PORT) -e APP_PORT=$(CONTAINER_PORT) $(TAG)
 
-stop:
-	@echo "Stopping and removing container '$(CONTAINER_NAME)'..."
-	@docker stop $(CONTAINER_NAME) > /dev/null 2>&1 || true
-	@docker rm $(CONTAINER_NAME) > /dev/null 2>&1 || true
-
-build-multiplatform:
-	@echo "Building and pushing multi-platform image: $(TAG)"
-	@docker buildx build --platform linux/amd64,linux/arm64 -t $(TAG) --build-arg index_url=$(index_url) -f Dockerfile . --push
-
+# Sends a test request to the running container.
 try-request:
-	@echo "Sending a test request to the running container..."
+	@echo "Sending a test request to http://localhost:$(HOST_PORT)/computation"
 	@curl -s -X POST -H "Content-Type: application/json" \
-	-d '{"pair": "BTC/USDT", "timeframe": "5m"}' \
+	-d '{"pair": "BTC/USDT", "timeframe": "15m"}' \
 	http://localhost:$(HOST_PORT)/computation
 
+# A convenience target to build, run, wait, and test all at once.
 test: run
-	@echo "Waiting for container to start..."
-	@sleep 5
+	@echo "Waiting for container and freqtrade bot to initialize..."
+	@sleep 15
 	@$(MAKE) try-request
