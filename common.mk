@@ -4,8 +4,11 @@
 #   - HOST_PORT
 #   - CONTAINER_PORT
 
-DOCKER_ORG ?= ghcr.io/hpp-io
-TAG := $(DOCKER_ORG)/example-$(EXAMPLE_NAME)-noosphere:latest
+# --- Image Naming Configuration ---
+# Set your GitHub username or organization name here.
+GH_OWNER ?= hpp-io
+
+TAG := ghcr.io/$(GH_OWNER)/example-$(EXAMPLE_NAME)-noosphere:latest
 CONTAINER_NAME := $(EXAMPLE_NAME)
 
 # Declare all phony targets to prevent conflicts with file names.
