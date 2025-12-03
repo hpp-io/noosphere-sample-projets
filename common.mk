@@ -23,7 +23,7 @@ stop:
 	@docker rm $(CONTAINER_NAME) > /dev/null 2>&1 || true
 
 # Pushes the built image to the Docker registry.
-push: build
+push: build-multiplatform
 	@echo "Pushing Docker image to registry: $(TAG)"
 	@docker push $(TAG)
 
