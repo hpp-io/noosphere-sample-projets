@@ -1,5 +1,6 @@
 import os
-from flask import Flask, request, jsonify
+import logging
+from flask import Flask, request, jsonify, Response
 from openai import OpenAI
 
 # --- Client Initialization ---
@@ -24,6 +25,9 @@ if gemini_api_key:
 if not clients:
     raise ValueError("No LLM provider credentials found. Please set GEMINI_API_KEY or LLMROUTER variables.")
 
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 app = Flask(__name__)
 
 @app.route('/computation', methods=['POST'])
@@ -33,6 +37,7 @@ def computation():
     Queries the specified model provider and returns the response.
     """
     data = request.get_json()
+    logging.info(f"Received request: {data}")
     if not data:
         return jsonify({"error": "Invalid JSON"}), 400
 
@@ -57,7 +62,7 @@ def computation():
             model = genai_client.GenerativeModel(model_name)
             response = model.generate_content(prompt)
             output = response.text
-            return jsonify({"output": output})
+            return Response(output, mimetype='text/plain')
         else: # All other providers go through the LLM Router
             if "llmrouter" not in clients:
                 return jsonify({"error": "LLMRouter client not configured."}), 500
@@ -67,9 +72,10 @@ def computation():
                 model=model_identifier, # Pass the full identifier to the router
             )
             output = chat_completion.choices[0].message.content
-            return jsonify({"output": output})
+            return Response(output, mimetype='text/plain')
 
     except Exception as e:
+        logging.error(f"An error occurred: {e}", exc_info=True)
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':

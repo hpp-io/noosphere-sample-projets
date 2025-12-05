@@ -24,5 +24,5 @@ try-request:
 try-request-gemini:
 	@echo "Sending a test request for a Gemini model..."
 	@curl -s -X POST -H "Content-Type: application/json" \
-	-d '{"model": "gemini/gemini-pro", "prompt": "What is noosphere?"}' \
+	-d '{"model": "gemini/gemini-2.5-flash", "prompt": "What is noosphere?"}' \
 	http://localhost:$(HOST_PORT)/computation
