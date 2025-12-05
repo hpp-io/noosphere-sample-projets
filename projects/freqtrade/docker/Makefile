@@ -17,7 +17,7 @@ run: stop build
 try-request:
 	@echo "Sending a test request to http://localhost:$(HOST_PORT)/computation"
 	@curl -s -X POST -H "Content-Type: application/json" \
-	-d '{"pair": "BTC/USDT", "timeframe": "15m"}' \
+	-d '{"pair": "ETH/USDT", "timeframe": "15m"}' \
 	http://localhost:$(HOST_PORT)/computation
 
 # A convenience target to build, run, wait, and test all at once.
