@@ -1,7 +1,15 @@
 import os
+import re
 import logging
 from flask import Flask, request, jsonify, Response
 from openai import OpenAI
+
+
+def detect_mimetype(content):
+    """Detect mimetype based on content. Returns 'image/svg+xml' for SVG, 'text/plain' otherwise."""
+    if content and re.search(r'<svg\s', content, re.IGNORECASE):
+        return 'image/svg+xml'
+    return 'text/plain'
 
 # --- Client Initialization ---
 
@@ -62,7 +70,7 @@ def computation():
             model = genai_client.GenerativeModel(model_name)
             response = model.generate_content(prompt)
             output = response.text
-            return Response(output, mimetype='text/plain')
+            return Response(output, mimetype=detect_mimetype(output))
         else: # All other providers go through the LLM Router
             if "llmrouter" not in clients:
                 return jsonify({"error": "LLMRouter client not configured."}), 500
@@ -72,7 +80,7 @@ def computation():
                 model=model_identifier, # Pass the full identifier to the router
             )
             output = chat_completion.choices[0].message.content
-            return Response(output, mimetype='text/plain')
+            return Response(output, mimetype=detect_mimetype(output))
 
     except Exception as e:
         logging.error(f"An error occurred: {e}", exc_info=True)
