@@ -11,6 +11,23 @@ def detect_mimetype(content):
         return 'image/svg+xml'
     return 'text/plain'
 
+
+def build_message_content(prompt, images=None, provider=None):
+    """Build message content for chat completion. Supports multimodal (text + images) input."""
+    if not images:
+        return prompt
+
+    # Multimodal format: array of content parts
+    content = [{"type": "text", "text": prompt}]
+    for image_url in images:
+        if provider == "anthropic":
+            # Claude format
+            content.append({"type": "image", "source": {"type": "url", "url": image_url}})
+        else:
+            # OpenAI format (default)
+            content.append({"type": "image_url", "image_url": {"url": image_url}})
+    return content
+
 # --- Client Initialization ---
 
 clients = {}
@@ -41,8 +58,8 @@ app = Flask(__name__)
 @app.route('/computation', methods=['POST'])
 def computation():
     """
-    Accepts a POST request with a JSON body containing 'model' and 'prompt' keys.
-    Queries the specified model provider and returns the response.
+    Accepts a POST request with a JSON body containing 'model', 'prompt', and optional 'images' keys.
+    Supports multimodal input (text + images) for vision-capable models.
     """
     data = request.get_json()
     logging.info(f"Received request: {data}")
@@ -51,6 +68,7 @@ def computation():
 
     prompt = data.get('prompt')
     model_identifier = data.get('model')
+    images = data.get('images')  # Optional: list of image URLs
 
     if not prompt:
         return jsonify({"error": "Missing 'prompt' in request body"}), 400
@@ -75,9 +93,13 @@ def computation():
             if "llmrouter" not in clients:
                 return jsonify({"error": "LLMRouter client not configured."}), 500
             router_client = clients["llmrouter"]
+            message_content = build_message_content(prompt, images, provider)
+            # Claude requires max_tokens parameter
+            extra_params = {"max_tokens": 4096} if provider == "anthropic" else {}
             chat_completion = router_client.chat.completions.create(
-                messages=[{"role": "user", "content": prompt}],
+                messages=[{"role": "user", "content": message_content}],
                 model=model_identifier, # Pass the full identifier to the router
+                **extra_params
             )
             output = chat_completion.choices[0].message.content
             return Response(output, mimetype=detect_mimetype(output))
