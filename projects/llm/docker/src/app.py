@@ -58,17 +58,37 @@ app = Flask(__name__)
 @app.route('/computation', methods=['POST'])
 def computation():
     """
-    Accepts a POST request with a JSON body containing 'model', 'prompt', and optional 'images' keys.
+    Accepts a POST request with a JSON body containing 'model', 'prompt', and optional 'images' or 'image' keys.
     Supports multimodal input (text + images) for vision-capable models.
+
+    Image formats supported:
+    - images: list of image URLs (e.g., ["https://...", "ipfs://..."])
+    - image: object with type and base64 data (e.g., {"type": "image/png", "data": "base64..."})
     """
     data = request.get_json()
-    logging.info(f"Received request: {data}")
+    # Log request without full image data to avoid huge logs
+    log_data = {k: v for k, v in data.items() if k != 'image'}
+    if 'image' in data:
+        log_data['image'] = f"<{data['image'].get('type', 'unknown')}, {len(data['image'].get('data', ''))} bytes>"
+    logging.info(f"Received request: {log_data}")
+
     if not data:
         return jsonify({"error": "Invalid JSON"}), 400
 
     prompt = data.get('prompt')
     model_identifier = data.get('model')
     images = data.get('images')  # Optional: list of image URLs
+    image = data.get('image')    # Optional: single image with base64 data
+
+    # Handle base64 image - convert to data URL format
+    if image and isinstance(image, dict) and 'data' in image:
+        image_type = image.get('type', 'image/png')
+        image_data = image.get('data')
+        # Create data URL from base64
+        data_url = f"data:{image_type};base64,{image_data}"
+        images = images or []
+        images.append(data_url)
+        logging.info(f"Converted base64 image to data URL ({image_type})")
 
     if not prompt:
         return jsonify({"error": "Missing 'prompt' in request body"}), 400
