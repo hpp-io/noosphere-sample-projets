@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 # Virtual Environments
-.env
+projects/llm/docker/.env
 .venv
 env/
 venv/
